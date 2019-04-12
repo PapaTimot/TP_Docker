@@ -1,7 +1,7 @@
 FROM ubuntu:latest
 
 RUN apt-get update -qq && apt-get install -yqq \
-    openjdk-8-jre \
+    openjdk-8-jdk \
     gcc \
     g++ \
     maven \
@@ -11,17 +11,21 @@ RUN apt-get update -qq && apt-get install -yqq \
     git \
     && rm -rf /var/lib/apt/lists/*
 
-RUN git clone https://github.com/opencv/opencv
+RUN apt-get update -qq && apt-get install -yqq     \
+    build-essential libgtk2.0-dev pkg-config       \
+    libavcodec-dev libavformat-dev libswscale-dev  \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN git clone --progress https://github.com/opencv/opencv
 WORKDIR /opencv/
 RUN git checkout 3.4.6
 
 RUN mkdir build
 WORKDIR /opencv/build/
-RUN cmake -D BUILD_SHARED_LIBS=OFF ..
+
+RUN echo $JAVA_HOME && \
+    cmake -D BUILD_SHARED_LIBS=OFF ..
 RUN make -j8
-
-RUN find -name *.jar
-
 
 RUN mvn install:install-file \ 
     -Dfile=./bin/opencv-346.jar \
@@ -31,9 +35,9 @@ RUN mvn install:install-file \
     -Dpackaging=jar
 
 WORKDIR /
-RUN git clone https://github.com/barais/ESIRTPDockerSampleApp
+RUN git clone --progress https://github.com/barais/ESIRTPDockerSampleApp
 WORKDIR /ESIRTPDockerSampleApp
-RUN sed -i 's/\"/home/barais/git/opencv/data/haarcascades/"\/\1"/opencv/data/haarcascades/"/' \
+RUN sed -i "s/\/home\/barais\/git\/opencv\/data\/haarcascades\//\/opencv\/data\/haarcascades\//g" \
     src/main/java/main/Main.java
 
 RUN mvn install
@@ -43,3 +47,5 @@ EXPOSE 8080
 
 CMD [ "java", "-Djava.library.path=/opencv/build/lib/ \
     -jar /ESIRTPDockerSampleApp/target/fatjar-0.0.1-SNAPSHOT.jar" ]
+
+# java -Djava.library.path=/opencv/build/lib/ -jar /ESIRTPDockerSampleApp/target/fatjar-0.0.1-SNAPSHOT.jar
