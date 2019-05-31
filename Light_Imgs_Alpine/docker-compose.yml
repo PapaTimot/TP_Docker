@@ -4,8 +4,8 @@ version: "3"
 services:
   # Define the service name 'javawebapp'
   javawebapp:
-    # Take the ligthweight image on docker hub
-    image: timmesir/mditpdocker:lightweightimg
+    # Take the ligthtest image on docker hub
+    image: timmesir/mditpdocker:lightestimg
     deploy:
       # Set the number of instance of our web server to 4
       replicas: 4
