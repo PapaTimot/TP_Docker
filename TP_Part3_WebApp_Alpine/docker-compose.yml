@@ -1,14 +1,22 @@
+# Author : Timothée Schneider-Maunoury
+
 version: "3"
 services:
+  # Define the service name 'javawebapp'
   javawebapp:
+    # Take the ligthweight image on docker hub
     image: timmesir/mditpdocker:lightweightimg
     deploy:
+      # Set the number of instance of our web server to 4
       replicas: 4
+      # The servers will restart each time they stop because of an iternal error
       restart_policy:
         condition: on-failure
+    # Map the port 8080 reachable  from the outside to the internal ports 8080 of the servers
     ports:
       - "8080:8080"
     networks:
       - webnet
+# Define a default network
 networks:
   webnet:
